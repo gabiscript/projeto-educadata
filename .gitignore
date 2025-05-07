@@ -1,0 +1,9 @@
+# Ignorar o arquivo de configuração com credenciais
+/config/*.pys
+
+# Ignorar arquivos Python compilados
+*.py[cod]
+__pycache__/
+
+# Ignorar arquivos de segredo
+*.secret
