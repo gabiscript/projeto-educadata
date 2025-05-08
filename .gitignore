@@ -28,3 +28,6 @@ __pycache__/
 data/
 datasets/
 
+# Ignora o arquivo myconfig.py
+config/myconfig.py
+
