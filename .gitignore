@@ -1,9 +1,30 @@
-# Ignorar o arquivo de configuração com credenciais
-/config/*.pys
+# Ignora arquivos temporários e de sistema
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
 
-# Ignorar arquivos Python compilados
-*.py[cod]
+# Ignora ambientes virtuais e dependências
+.venv/
+env/
 __pycache__/
+*.py[cod]
 
-# Ignorar arquivos de segredo
-*.secret
+# Ignora arquivos de configuração do Databricks
+*.dbc
+*.dbc-meta.json
+.dbx/
+.repos/
+.checkpoints/
+.ipynb_checkpoints/
+
+# Dados
+*.csv
+*.parquet
+*.json
+*.xlsx
+data/
+datasets/
+
