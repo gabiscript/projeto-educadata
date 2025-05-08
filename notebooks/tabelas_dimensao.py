@@ -42,7 +42,6 @@ coluna_tempo = ["CO_ENTIDADE", "NU_ANO_CENSO"]
 
 dimensao_tempo = df_ativas.select(*coluna_tempo).dropDuplicates()
 
-
 # COMMAND ----------
 
 # MAGIC %md
