@@ -11,11 +11,16 @@ jobs:
       
       - name: Checkout código
         uses: actions/checkout@v3
-  
-      - name: Login no Azure
-        uses: azure/login@v1
+        
+      - name: Install Azure CLI
+        uses: azure/setup-azure@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          version: latest
+          
+      - name: Use access token to call Azure REST API
+        run: |
+          curl -X GET https://management.azure.com/subscriptions?api-version=2020-01-01 \
+            -H "Authorization: Bearer ${{ secrets.AZURE_ACCESS_TOKEN }}"
 
       - name: Deploy Infra com Bicep
         run: |
