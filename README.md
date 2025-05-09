@@ -13,8 +13,6 @@ O projeto está nas etapas iniciais de desenvolvimento
 - Cálculo de indicadores com DAX
 - Visualização final no Power BI
 ## Stack do projeto 
-- Azure Data Factory
 - Azure Blob Storage
 - Azure Databricks 
-- Github + Github Actions (CI/CD)
 - Power BI
