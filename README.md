@@ -1,6 +1,8 @@
 
 # Projeto EducaData 📊
-Projeto baseado na análise e visualização de dados do Censo Escolar com base na comparação dos dados quanto à infraestrutura das escolas no Brasil nos anos de 2020 a 2024
+Projeto com foco na análise e visualização de dados do Censo Escolar, com ênfase na comparação dos dados quanto à infraestrutura das escolas no Brasil nos anos de 2020 a 2024
+
+
 ## Status do Projeto
 O projeto está nas etapas iniciais de desenvolvimento
 ## Etapas concluídas
