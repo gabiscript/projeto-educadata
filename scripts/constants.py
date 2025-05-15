@@ -1,24 +1,3 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Configuração Inicial
-# MAGIC Imports Necessários 
-
-# COMMAND ----------
-
-import sys
-import os
-sys.path.append('/Workspace/Users/santos.gabriela04@edu.pucrs.br/projeto-educadata/config')
-from pyspark.sql.functions import isnull, when, count, col, lit, countDistinct
-from myconfig import STORAGE_ACCOUNT, CONTAINER, FINAL_CONTAINER
-
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Listas para Configuração do Dataset
-
-# COMMAND ----------
-
 filtered_columns = [
     # General Data
     "NU_ANO_CENSO",         # Census year
@@ -86,95 +65,57 @@ num_cols = ["QT_MAT_INF", "QT_MAT_FUND", "QT_MAT_MED", "QT_PROF_COORDENADOR", "Q
 
 years = [2020, 2021, 2022, 2023, 2024]
 
+col_dim_esc = [
+    "CO_ENTIDADE",
+    "NU_ANO_CENSO", 
+    "NO_ENTIDADE", 
+    "SG_UF", 
+    "CO_UF", 
+    "CO_MUNICIPIO", 
+    "NO_MUNICIPIO", 
+    "TP_DEPENDENCIA", 
+    "TP_LOCALIZACAO"]
 
-# COMMAND ----------
+col_fato = [
+    "CO_ENTIDADE",
+    "NU_ANO_CENSO",
+    "QT_MAT_INF",
+    "QT_MAT_FUND",
+    "QT_MAT_MED",
+    "QT_PROF_COORDENADOR",
+    "QT_PROF_SAUDE",
+    "QT_PROF_ASSIST_SOCIAL",
+    "QT_PROF_PSICOLOGO",
+    "QT_COMP_PORTATIL_ALUNO",
+    "QT_DESKTOP_ALUNO"]
 
-# MAGIC %md
-# MAGIC # Funções de Definição
-
-# COMMAND ----------
-
-def connect_blob():
-    try:
-        spark.conf.set(
-        f"fs.azure.account.key.{STORAGE_ACCOUNT}.blob.core.windows.net", 
-        dbutils.secrets.get(scope="azure-storage", key="storage-account-key")
-    )
-    except Exception as e:
-        raise Exception("Erro ao acessar Azure Storage Key. Verifique o Secret Scope: " + str(e))
-
-    if not all([STORAGE_ACCOUNT, CONTAINER, FINAL_CONTAINER]):
-        raise ValueError("Variáveis de ambiente não configuradas corretamente")
-
-def read_csv(file_path):
-
-    path = f"wasbs://{CONTAINER}@{STORAGE_ACCOUNT}.blob.core.windows.net/{file_path}"
-    return spark.read.csv(path, sep=';', header= True, encoding='ISO-8859-1')
-
-def filter_active(df):
-    return df.filter(col('TP_SITUACAO_FUNCIONAMENTO') == 1)\
-             .select(*filtered_columns)\
-             .dropDuplicates()
-
-def value_transform(df):
-    df = df.withColumn(
-    "TP_LOCALIZACAO",
-    when(col("TP_LOCALIZACAO")==1, "Urbana")
-    .when(col("TP_LOCALIZACAO")==2, "Rural")
-    .otherwise("Outro")
-    ).withColumn(
-    "TP_DEPENDENCIA",
-    when(col("TP_DEPENDENCIA")==1, "Federal")
-    .when(col("TP_DEPENDENCIA")==2, "Estadual")
-    .when(col("TP_DEPENDENCIA")==3, "Municipal")
-    .when(col("TP_DEPENDENCIA")==4, "Privada")
-    .otherwise("Outro")
-    )
-
-    for col_name in num_cols:
-        df = df.withColumn(col_name, col(col_name).cast("int"))
-
-    return df
-
-def process_df(file_path):
-    connect_blob()
-    df_raw = read_csv(file_path)
-    df_active = filter_active(df_raw)
-    df_filtered = value_transform(df_active)
-    return df_filtered
-
-def process_year(year):
-    path = f"microdados_ed_basica_{year}.csv"
-    df = process_df(path)
-    df = df.withColumn("NU_ANO_CENSO", lit(year))
-    return df
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Dataset Final
-
-# COMMAND ----------
-
-dfs = [process_year(year) for year in years]
-
-df_unified = dfs[0]
-for df in dfs[1:]:
-    df_unified = df_unified.unionByName(df)
-
-df_codes = df_unified.select("CO_ENTIDADE", "NU_ANO_CENSO").dropDuplicates()
-select_all_years = df_codes.groupBy("CO_ENTIDADE")\
-                    .agg(countDistinct('NU_ANO_CENSO').alias("anos_distintos"))\
-                    .filter("anos_distintos = 5")
-df_final = df_unified.join(select_all_years, on="CO_ENTIDADE", how="inner")
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Envio dos Dados para o Blob
-
-# COMMAND ----------
-
-
-output_path = f"wasbs://{FINAL_CONTAINER}@{STORAGE_ACCOUNT}.blob.core.windows.net/censo_por_ano"
-df_final.write.mode("overwrite").parquet(output_path)
+col_dim_infra = [
+    "CO_ENTIDADE",
+    "NU_ANO_CENSO",
+    "IN_AGUA_POTAVEL",
+    "IN_ENERGIA_REDE_PUBLICA",
+    "IN_ESGOTO_REDE_PUBLICA",
+    "IN_LIXO_SERVICO_COLETA",
+    "IN_TRATAMENTO_LIXO_SEPARACAO",
+    "IN_TRATAMENTO_LIXO_REUTILIZA",
+    "IN_TRATAMENTO_LIXO_RECICLAGEM",
+    "IN_BANHEIRO",
+    "IN_BANHEIRO_PNE",
+    "IN_REFEITORIO",
+    "IN_ALIMENTACAO",
+    "IN_QUADRA_ESPORTES",
+    "IN_QUADRA_ESPORTES_COBERTA",
+    "IN_BIBLIOTECA",
+    "IN_LABORATORIO_CIENCIAS",
+    "IN_LABORATORIO_INFORMATICA",
+    "IN_MEDIACAO_EAD",
+    "IN_MEDIACAO_SEMIPRESENCIAL",
+    "IN_MEDIACAO_PRESENCIAL",
+    "IN_INTERNET",
+    "IN_COMPUTADOR",
+    "IN_EQUIP_MULTIMIDIA",
+    "IN_EQUIP_TV",
+    "IN_PROF_PSICOLOGO",
+    "IN_PROF_ASSIST_SOCIAL",
+    "IN_PROF_SAUDE",
+    "IN_PROF_COORDENADOR"]
